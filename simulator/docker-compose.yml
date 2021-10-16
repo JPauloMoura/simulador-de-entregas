@@ -1,0 +1,23 @@
+# exec: $ docker-compose up -d
+# navegador: http://localhost:15672/
+
+
+# versão do docker compose
+version : '3'
+
+# declaração dos serviços que seram usados
+services:
+  # serviço 1: o nome pode ser da sua escolha
+  rabbitmq:
+    # nome da imagem que sera usada para esse serviço 
+    image: "rabbitmq:3-management"
+    # variaveis de ambiete
+    environment:
+      RABBITMQ_DEFAULT_USER: "admin"
+      RABBITMQ_DEFAULT_PASS: "admin"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    ports:
+    # porta usadas para comunicação com rabbitmq [local:container]
+      - "15672:15672"
+    # porta usadas para comunicação com a aplicação [local:container]
+      - "5672:5672"
