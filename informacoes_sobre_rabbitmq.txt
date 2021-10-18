@@ -1,0 +1,66 @@
+== RabbitMQ  sistema de mensageria | conceitos basicos
+
+- permite a comunicação entre microsserviços
+- message broker: intermediador de mensagem
+- implementa varios protocolos de comunicação: AMQP(mais usado), MQTT, STOMP, HTTP
+- cria apenas uma conexão TCP entre [client] --- [serve]
+- dentro dessa conexão é criado varios channels
+- cada channel é uma thred
+
+- publisher: responsavel pela publicação das msg
+- exchanger: responsavel por identificar pra qual queue deve ser enviada essa msg
+- queue: fila de msg
+	as msg publicadas são envidas para uma queue, e o consumer ler essa fila
+	cada mensagem que é lida é removida da queue
+- consumer: responsavel por ler as msgs
+- bind: processo de relacionar um exchange a queues. isso é feito por uma rountig key
+- rountig key: usada para identificar qual queue a msg deve ser enviada, ela é setada dentro da msg(como um destino)
+
+Tipos de Exchange
+Direct: pega uma msg e envia para uma determinada queue
+	- bind: processo de relacionar um exchange a queues. isso é feito por uma rountig key
+	- rountig key: usada para identificar qual queue a msg deve ser enviada, ela é setada dentro da msg(como um destino)
+Fanout: pega uma msg e envia para todas as queue que estão relacionadas com essa exchange
+	- não possui rountig key, pois as msg são enviadas para todas as queue
+Topic: dependento da regra na msg e enviada para uma queue relacionada
+	- as msg possui rountig key com regras como expressões regulares (todos as queue: *cpf,  doc* )
+Headers: no header da msg e informado para qual queue deve ser enviada (menos utilizado)
+
+Filas
+FIFO: first in. first out (primeira entrar, primeira a sair)
+Propriedades:
+	Durable: as mensagens da queue são salvas em disco para não existir perdas
+	Auto-delete: quando um consumer e desconectado de uma fila a fila é deletada
+	Expiry: define um tempo limite  de espera sem mgs ou sem consumer lendo essa fila (tempo ocioso). assim  a queue e deletada
+	Msg TTl: tempo de vida de uma msg. deleta a msg caso nçao seja lida durante seu tempo limit
+	Overflow: limite da fila.
+		 Drop head: quando ela encher, é deletado a ultim msg para que entre uma nova
+		 Reject publisg: quando a fila encher, ela deixa de aceitar novas msgs
+	Exlusive: somente o channel que criou a vila pode ter acesso a ela. 
+	Max length/bytes: limite da fila ou limite no tamanho da msg
+
+Dead letter queues
+	- quando alguma msg não consegue ser entrege.
+	- enviamos essa msg pra um exchange -> queue -> consumer que trata essas msg não lidas
+Lazy queues
+	- guardas as msg armazenadas em disco quando temos um fluixo muito grande.
+	- leitura i/o e mais custosa(lenta)
+
+========= Desenvolvimento do projeto ===============
+Depois que o container do rabitMQ subir  você pode acessa-lo em http://localhost:15672/
+insira o user e senha cadastrasdas e vera o dash de configurações
+
+- Criação de filas(queue)
+	vá em  Queues > add a new queue
+	escolha o tipo, nome da fila, durability (Durable as menssagens não seram perdidas no caso de queda).
+- Criação do Exchange
+	- escolha o tipo amq.direct
+	- crie um bind do exchange para fila "positions"
+	- crie a routing key "mapping.get.positions"
+
+- Teste o funcionamento:
+	vá em queues > clique na fila criada > publish message
+	- escreva a msg e envie
+	- para ver vá em get message e click em get
+	- utilize o ack mode com "Automatic ack" ou "ack message requeue false", para que após a msg ser lida ela seja removida da fila
+	
